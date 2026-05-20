@@ -20,6 +20,29 @@ with NCI `intake-esm` catalogs and ESGF online data.
 | `colormap.py` | Custom color-map helpers. |
 | `Sandbox.ipynb` | Working notebook for experiments and examples. |
 
+
+## Installation
+
+For development on Gadi or a local machine, install the package in editable mode:
+
+```bash
+python -m pip install -e .
+```
+
+Then import the package modules directly:
+
+```python
+from zpackage import Ztake
+from zpackage import wmt
+
+# or, while the refactored APIs are being tested:
+from zpackage import wmt_refactored
+from zpackage import ztake_refactored
+```
+
+The root-level scripts are kept for backward compatibility. The installable package
+lives under `src/zpackage/`.
+
 ## Environment
 
 The examples below are designed for NCI Gadi with an `analysis3` environment:
