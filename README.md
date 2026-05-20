@@ -16,7 +16,6 @@ with NCI `intake-esm` catalogs and ESGF online data.
 | `ztake.py` | Original Ztake implementation. |
 | `ztake_refactored.py` | Refactored Ztake workflow with multi-catalog support, model/member/grid inspection, local opening, online ESGF opening, and local-vs-online comparison. |
 | `wmt.py` | Water-mass transformation utilities. |
-| `zclef.py`, `zclef_v2.py` | Climate/ocean analysis helpers. |
 | `colormap.py` | Custom color-map helpers. |
 | `Sandbox.ipynb` | Working notebook for experiments and examples. |
 
