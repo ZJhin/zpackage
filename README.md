@@ -320,7 +320,138 @@ zt.compare_with_esgf(
 - Keep `ztake_refactored.py` separate while testing. Once the API is stable, it
   can be merged back into `ztake.py` or turned into a package module.
 
-## Recommended Workflow
+## WMT Refactored Workflow
+
+`wmt_refactored.py` contains a safer water-mass-transformation workflow. It keeps
+the original `wmt.py` untouched, but adds TEOS-10 conversion, density-bin WMT,
+area-weighted Sv output, latitude masking, and quick plotting helpers.
+
+Basic import:
+
+```python
+import sys
+sys.path.insert(0, "/g/data/jk72/zc0441/zpackage")
+
+import wmt_refactored as wmt
+```
+
+### Compute WMT in density bins
+
+The default density coordinate is now `sigma0`, with bins from 24 to 29 at 0.1
+intervals. Positive WMT means densification, or transformation toward higher
+density. Because the default output unit is `Sv`, pass cell area with
+`area=areacello`.
+
+```python
+wmt_wfo = wmt.wmt_by_density_bins(
+    forcing=wfo,
+    density=None,
+    salinity=sos,
+    temperature=tos,
+    area=areacello,
+    transform_type="water",
+    lat_boundary=-45,
+)
+```
+
+For heat-driven WMT:
+
+```python
+wmt_hfds = wmt.wmt_by_density_bins(
+    forcing=hfds,
+    density=None,
+    salinity=sos,
+    temperature=tos,
+    area=areacello,
+    transform_type="heat",
+    lat_boundary=-45,
+)
+```
+
+Useful defaults:
+
+| Parameter | Default | Meaning |
+| --- | --- | --- |
+| `density_kind` | `"sigma0"` | Use potential density anomaly for bins. |
+| `density_min`, `density_max` | `24`, `29` | Density-bin range. |
+| `density_step` | `0.1` | Density-bin width. |
+| `output_unit` | `"Sv"` | Area-integrated WMT divided by `1e6`. |
+| `wmt_sign` | `"positive_densification"` | Positive values mean transformation toward higher density. |
+
+If you want the density field returned with the binned WMT:
+
+```python
+out = wmt.wmt_by_density_bins(
+    forcing=wfo,
+    density=None,
+    salinity=sos,
+    temperature=tos,
+    area=areacello,
+    transform_type="water",
+    lat_boundary=-45,
+    return_density=True,
+)
+
+wmt_wfo = out["wmt_by_density"]
+sigma0 = out["density_field"]
+```
+
+### Blocked decade workflow
+
+If data have already been preprocessed into blocks, for example
+`(block, month, j, i)`, use:
+
+```python
+wmt_wfo_block = wmt.blocked_wmt_by_density_bins(
+    data_dict[model],
+    forcing_name="wfo_monthly",
+    density_name=None,
+    salinity_name="sos_monthly",
+    temperature_name="tos_monthly",
+    area_name="areacello",
+    transform_type="water",
+    lat_boundary=-45,
+)
+```
+
+The blocked helper automatically infers `time` or `month`, and it tries to read
+`lat/lon` from coordinates. It does not silently regrid `areacello`; if the area
+grid is incompatible with the data grid, pre-align it before calling the WMT
+function.
+
+### Quick WMT plots
+
+Single model:
+
+```python
+ax = wmt.plot_wmt_components(
+    wmt_heat=wmt_hfds,
+    wmt_water=wmt_wfo,
+    density_range=(24, 29),
+    title=model,
+)
+```
+
+Model grid:
+
+```python
+fig, axes = wmt.plot_wmt_model_grid(
+    data_dict,
+    model_list,
+    heat_key="wmt_hfds_block_mean",
+    water_key="wmt_wfo_block_mean",
+    ncols=4,
+    density_range=(24, 29),
+    ylim="symmetric",
+    savepath="wmt_binned_pi.png",
+)
+```
+
+The plotting helper smooths along density, handles Dask-backed arrays by
+rechunking the density dimension, and returns `fig, axes` without forcing
+`plt.show()`.
+
+## Recommended Ztake Workflow
 
 ```python
 from ztake_refactored import Ztake
