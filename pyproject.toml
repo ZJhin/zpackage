@@ -1,0 +1,38 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "zpackage"
+version = "0.1.0"
+description = "Utilities for CMIP6 ocean and climate analysis workflows."
+readme = "README.md"
+requires-python = ">=3.10"
+authors = [
+  {name = "Zijin Chen"}
+]
+dependencies = [
+  "numpy",
+  "pandas",
+  "xarray",
+  "dask",
+  "requests",
+  "gsw",
+  "matplotlib",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest",
+  "ruff",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.ruff]
+line-length = 120
+src = ["src", "tests"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
